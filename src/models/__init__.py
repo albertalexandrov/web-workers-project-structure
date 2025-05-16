@@ -1,5 +1,5 @@
-from models.users import User
+from models.help import ArticleContent, Subsection, SubsectionDocument, Section, Widget, Menu
 
 __all__ = [
-    "User",
+    "ArticleContent", "Subsection", "SubsectionDocument", "Section", "Widget", "Menu"
 ]

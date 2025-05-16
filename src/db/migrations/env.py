@@ -7,14 +7,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from config import settings
-from models.base import Base
+from models import Subsection
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = Subsection.metadata
 config.set_main_option("sqlalchemy.url", settings.db.dsn.render_as_string(hide_password=False))
 
 
