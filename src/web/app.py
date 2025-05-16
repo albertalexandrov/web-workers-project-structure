@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI, APIRouter
+from prometheus_fastapi_instrumentator import PrometheusFastApiInstrumentator
 from starlette.staticfiles import StaticFiles
 
 from config import settings
@@ -26,6 +27,12 @@ def add_middlewares(app: FastAPI):
     app.middleware("http")(example_middleware)
 
 
+def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
+    instrumentator = PrometheusFastApiInstrumentator(should_group_status_codes=False)
+    instrumentator = instrumentator.instrument(app)
+    instrumentator.expose(app, should_gzip=True, name="prometheus_metrics", tags=["Метрики"])
+
+
 def get_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
@@ -36,4 +43,5 @@ def get_app() -> FastAPI:
     )
     include_routers(app)
     add_middlewares(app)
+    setup_prometheus(app)
     return app
