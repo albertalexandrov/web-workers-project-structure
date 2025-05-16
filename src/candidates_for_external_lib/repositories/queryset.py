@@ -54,7 +54,7 @@ class QuerySet:
     def __init__(self, model, session: AsyncSession, stmt=None):
         self._model = model
         self._session = session
-        self._stmt = stmt or select(self._model)
+        self._stmt = stmt if stmt is not None else select(self._model)
         self._joins = {}
         self._options = []
 
@@ -164,6 +164,10 @@ class QuerySet:
     async def exists(self):
         count = await self.count()
         return count > 0
+
+    async def scalar(self):
+        self._build_stmt()
+        return await self._session.scalar(self._stmt)
 
     # todo: methods
     #
