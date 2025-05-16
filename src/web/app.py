@@ -2,12 +2,16 @@ import logging
 from pathlib import Path
 
 import sentry_sdk
+from benedict import benedict
 from fastapi import FastAPI, APIRouter
+from fastapi.exceptions import RequestValidationError
 from prometheus_fastapi_instrumentator import PrometheusFastApiInstrumentator
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
 
 from config import settings
@@ -15,9 +19,28 @@ from shared.constants import EnvironmentEnum
 
 from web.api.docs.views import router as docs_router
 from web.api.monitoring.views import router as monitoring_router
+from web.api.help.views import router as help_router
+from web.exceptions import RequestBodyValidationError
+from web.i18n import locale
 from web.middlewares import example_middleware
 
 APP_ROOT = Path(__file__).parent
+
+
+def request_body_validation_error_handler(request: Request, exc: RequestBodyValidationError):
+    return JSONResponse(exc.validation_errors, status_code=422)
+
+
+def request_validation_error_handler(request: Request, exc):
+    errors = locale.translate(exc.errors(), "ru_RU")
+    content = benedict()
+    for error in errors:
+        key = []
+        for item in error["loc"][1:]:
+            key.append(item)
+        key = '.'.join(key)
+        content[key] = error["msg"]
+    return JSONResponse(content, status_code=422)
 
 
 def include_routers(app: FastAPI):
@@ -26,6 +49,7 @@ def include_routers(app: FastAPI):
         app.mount(f"/{settings.api.root}/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
         router.include_router(docs_router)
     router.include_router(monitoring_router)
+    router.include_router(help_router)
     app.include_router(router)
 
 
@@ -58,6 +82,10 @@ def get_app() -> FastAPI:
         openapi_url=(f"/{settings.api.root}/docs/openapi.json" if settings.api.docs_enabled else None),
         redoc_url=None,
         version=settings.api.version,
+        exception_handlers={
+            RequestValidationError: request_validation_error_handler,
+            RequestBodyValidationError: request_body_validation_error_handler,
+        },
     )
     include_routers(app)
     add_middlewares(app)

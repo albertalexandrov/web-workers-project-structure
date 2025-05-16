@@ -2,6 +2,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from candidates_for_external_lib.repositories import mixin
+from web.dependencies import get_session
 
 
 class BaseRepository(mixin.BaseRepository):

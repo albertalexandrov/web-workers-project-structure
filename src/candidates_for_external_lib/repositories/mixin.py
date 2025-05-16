@@ -1,4 +1,3 @@
-from fastapi.params import Depends
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +13,8 @@ class BaseRepository:
     async def create(self, **values):
         instance = self.model(**values)
         self._session.add(instance)
+        await self._session.commit()
+        print(instance)
         return instance
 
     @property

@@ -29,21 +29,11 @@ class ArticleContentType(StrEnum):
 class LastActionModelMixin(TimestampzMixin):
     created_by_id: Mapped[int | None]
     updated_by_id: Mapped[int | None]
-    # created_at: Mapped[datetime] = mapped_column(
-    #     TIMESTAMP(timezone=True),
-    #     default=utcnow,
-    #     server_default=func.now(),
-    #     comment="Дата и время создания записи",
-    # )
-    # updated_at: Mapped[datetime | None] = mapped_column(
-    #     TIMESTAMP(timezone=True),
-    #     onupdate=utcnow,
-    #     comment="Дата и время обновления записи",
-    # )
 
 
 class Menu(LastActionModelMixin, Base):
     __tablename__ = "help_menu"
+    __mapper_args__ = {"eager_defaults": True}
     __repr_attrs__ = ("id", "name", "order")
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -64,7 +54,6 @@ class Menu(LastActionModelMixin, Base):
     order: Mapped[int]
     is_modal: Mapped[bool] = mapped_column(default=False, comment="Признак модального окна")
     modal_text: Mapped[str | None] = mapped_column(comment="Текст для модального окна")
-
 
 
 class Section(LastActionModelMixin, Base):
@@ -88,6 +77,7 @@ class Section(LastActionModelMixin, Base):
 class Subsection(LastActionModelMixin, Base):
     __tablename__ = "help_subsection"
     __repr_attrs__ = ("id", "code", "name", "status", "order")
+    __mapper_args__ = {"eager_defaults": True}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     section_id: Mapped[int] = mapped_column(ForeignKey("help_section.id"))
@@ -127,6 +117,7 @@ class ArticleContent(LastActionModelMixin, Base):
     """
 
     __tablename__ = "help_articlecontent"
+    __mapper_args__ = {"eager_defaults": True}
     __repr_attrs__ = ("id", "subtitle", "content_type", "order")
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -150,10 +141,6 @@ class ArticleContent(LastActionModelMixin, Base):
 
 
 class Widget(Base):
-    """
-    Виджет в справке.
-    """
-
     __tablename__ = "help_widget"
     __repr_attrs__ = ("id", "code", "name")
 
@@ -161,4 +148,3 @@ class Widget(Base):
     name: Mapped[str] = mapped_column(String(255))
     code: Mapped[str] = mapped_column(String(50), unique=True)
     articles: Mapped[list["ArticleContent"]] = relationship(back_populates="widget")
-

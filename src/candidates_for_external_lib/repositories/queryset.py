@@ -1,5 +1,5 @@
 from fastapi_filter.contrib.sqlalchemy import Filter
-from sqlalchemy import select, extract, inspect
+from sqlalchemy import select, extract, inspect, func, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.sql import operators
@@ -51,10 +51,10 @@ class QuerySet:
         'day_le': lambda c, v: extract('day', c) <= v,
     }
 
-    def __init__(self, model, session: AsyncSession):
+    def __init__(self, model, session: AsyncSession, stmt=None):
         self._model = model
         self._session = session
-        self._stmt = select(self._model)
+        self._stmt = stmt or select(self._model)
         self._joins = {}
         self._options = []
 
@@ -64,6 +64,7 @@ class QuerySet:
         #   first_name__in=["Alex", "John"]
         #   type__code="sh" - through relation
         #   etc
+        # todo: цепочечное применение фильтров. обратить внимание на join-ы
         for attr, value in filters.items():
             model = self._model
             if "__" in attr:
@@ -154,6 +155,15 @@ class QuerySet:
         self._build_stmt()
         stmt = self._stmt.limit(1)
         return await self._session.scalar(stmt)
+
+    async def count(self):
+        self._build_stmt()
+        stmt = self._stmt.with_only_columns(func.count(literal_column("1")), maintain_column_froms=True)
+        return await self._session.scalar(stmt)
+
+    async def exists(self):
+        count = await self.count()
+        return count > 0
 
     # todo: methods
     #
