@@ -1,7 +1,13 @@
+import logging
 from pathlib import Path
 
+import sentry_sdk
 from fastapi import FastAPI, APIRouter
 from prometheus_fastapi_instrumentator import PrometheusFastApiInstrumentator
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 from starlette.staticfiles import StaticFiles
 
 from config import settings
@@ -34,6 +40,18 @@ def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
 
 
 def get_app() -> FastAPI:
+    if settings.sentry_dsn:
+        sentry_sdk.init(
+            dsn=settings.sentry_dsn,
+            traces_sample_rate=0.1,
+            environment=settings.environment,
+            integrations=[
+                StarletteIntegration(),
+                FastApiIntegration(transaction_style="endpoint"),
+                LoggingIntegration(level=logging.getLevelName(settings.log_level)),
+                SqlalchemyIntegration(),
+            ],
+        )
     app = FastAPI(
         title=settings.app_name,
         docs_url=None,

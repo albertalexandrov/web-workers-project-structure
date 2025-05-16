@@ -14,6 +14,7 @@ if ENVIRONMENT == EnvironmentEnum.LOCAL:
 class Settings(BaseSettings):
     app_name: str = "Мое приложение"
     environment: str = ENVIRONMENT
+    log_level: str = "INFO"
     uvicorn: UvicornSettings = Field(default_factory=UvicornSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     api: ApiSettings = Field(default_factory=ApiSettings)
