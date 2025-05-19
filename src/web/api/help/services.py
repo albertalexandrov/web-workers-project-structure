@@ -116,7 +116,6 @@ class ArticleContentCreateService(ArticleContentCreateUpdateValidationMixin, Get
         return await self._article_content_repository.create(**validated_data)
 
 
-
 class ArticleContentUpdateService(ArticleContentCreateUpdateValidationMixin, GetOr404Mixin):
     # по идее схема для обновления не должна включать возможность изменения подраздела,
     # а валидация не должна запрашивать виджет, если виджет не меняется
