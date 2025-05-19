@@ -3,9 +3,10 @@ from fastapi_filter import FilterDepends
 
 from candidates_for_external_lib.responses.paginated import PaginatedResponse
 from candidates_for_external_lib.pagination import PageNumberPagination
-from shared.repositories.help import WidgetsRepository, SectionsRepository
-from web.api.help.filters import SectionFilters
-from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema
+from shared.repositories.help import WidgetsRepository, SectionsRepository, ArticleContentRepository
+from web.api.help.filters import SectionFilters, ArticleContentFilters
+from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema, \
+    RetrieveArticleContentSchema
 from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService
 from web.exceptions import NotFoundError
 
@@ -50,3 +51,12 @@ async def get_sections(
     repository: SectionsRepository = Depends(),
 ):
     return await repository.get_list_w_subsections(filtering, pagination)
+
+
+@router.get("/article_content", response_model=PaginatedResponse[RetrieveArticleContentSchema])
+async def get_article_contents(
+    filtering: ArticleContentFilters = FilterDepends(ArticleContentFilters),
+    pagination: PageNumberPagination = Depends(),
+    repository: ArticleContentRepository = Depends(),
+):
+    return await repository.get_list_w_widgets(filtering, pagination)

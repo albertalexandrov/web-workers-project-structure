@@ -33,3 +33,14 @@ class CreateUpdateSectionSchema(BaseModel):
     status: ReferenceInfoStatus
     page_url: Annotated[AnyUrl, AfterValidator(lambda value: str(value))]
     order: int
+
+
+class RetrieveArticleContentSchema(BaseModel):
+    id: int
+    subsection_id: int
+    subtitle: str | None
+    text: str | None
+    video_url: str | None
+    order: int
+    content_type: str
+    widget: WidgetSchema | None

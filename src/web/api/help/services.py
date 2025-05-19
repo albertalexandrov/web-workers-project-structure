@@ -2,7 +2,7 @@ from fastapi import Depends
 
 from candidates_for_external_lib.pagination import PageNumberPagination
 from models import Section
-from models.help import ReferenceInfoStatus, Subsection
+from models.help import ReferenceInfoStatus, Subsection, ArticleContent
 from shared.repositories.help import SectionsRepository, SubsectionRepository
 from web.api.help.filters import SectionFilters
 from web.api.help.schemas import CreateUpdateSectionSchema
@@ -79,11 +79,3 @@ class SectionDeleteService:
             # todo: заменить на метод кверисета get_one_or_raise или типа того
             return section
         raise NotFoundError
-
-
-class PaginateSectionsService:
-    def __init__(self, section_repository: SectionsRepository = Depends()):
-        self._section_repository = section_repository
-
-    async def get_sections(self, filters: SectionFilters, pagination: PageNumberPagination) -> dict:
-        pass

@@ -1,10 +1,10 @@
 from sqlalchemy import select, null
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from candidates_for_external_lib.pagination import PageNumberPagination
-from models import Widget, Section, Subsection
+from models import Widget, Section, Subsection, ArticleContent
 from shared.repositories.base import BaseRepository
-from web.api.help.filters import SectionFilters
+from web.api.help.filters import SectionFilters, ArticleContentFilters
 
 
 class WidgetsRepository(BaseRepository):
@@ -53,3 +53,19 @@ class SectionsRepository(BaseRepository):
 
 class SubsectionRepository(BaseRepository):
     model = Subsection
+
+
+class ArticleContentRepository(BaseRepository):
+    model = ArticleContent
+
+    async def get_list_w_widgets(
+        self, filtering: ArticleContentFilters = None, pagination: PageNumberPagination | None = None
+    ):
+        # todo: кандидат на замену методом кверисета
+        stmt = select(self.model).options(joinedload(self.model.widget))
+        return await self.get_list(stmt, pagination, filtering)
+
+    async def get_article_content_for_retrieve(self, article_content_id: int) -> ArticleContent | None:
+        # todo: кандидат на замену методом кверисета
+        stmt = select(self.model).where(self.model.id == article_content_id).options(joinedload(self.model.widget))
+        return await self._session.scalar(stmt)
