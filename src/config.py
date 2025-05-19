@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from candidates_for_external_lib.settings import DatabaseSettings, UvicornSettings, ApiSettings
+from candidates_for_external_lib.settings import DatabaseSettings, UvicornSettings, ApiSettings, RedisBrokerSettings
 from shared.constants import EnvironmentEnum
 
 ENVIRONMENT = EnvironmentEnum.get_environment()
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     uvicorn: UvicornSettings = Field(default_factory=UvicornSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     api: ApiSettings = Field(default_factory=ApiSettings)
+    redis_broker: RedisBrokerSettings = Field(default_factory=RedisBrokerSettings)  # можно как то уточнить, что это faststream
     sentry_dsn: str | None = None
 
     model_config = SettingsConfigDict(env_prefix="MY_PROJECT__", env_nested_delimiter="__")

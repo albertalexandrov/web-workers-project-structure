@@ -55,3 +55,11 @@ class ApiSettings(BaseModel):
     root: str = "/api"
     docs_enabled: bool = True
     version: str = "0.1"
+
+
+class RedisBrokerSettings(BaseModel):
+    host: str = "localhost"
+    port: int = 6379
+    # todo:
+    #  другие настройки для faststream.redis.RedisBroker
+    #
