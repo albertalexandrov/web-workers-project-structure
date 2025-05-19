@@ -16,7 +16,7 @@ class BaseRepository:
     async def create(self, **values):
         instance = self.model(**values)
         self._session.add(instance)
-        await self._session.commit()
+        await self._session.commit()  # todo: пока так. позже подумаю, как внедрить транзакцию
         return instance
 
     @property
@@ -35,6 +35,7 @@ class BaseRepository:
     async def delete(self):
         stmt = delete(self.model)
         await self._session.execute(stmt)
+        await self._session.commit()  # todo: пока так. позже подумаю, как внедрить транзакцию
 
     async def get_list(self, query=None, pagination: PageNumberPagination | None = None, filtering=None):
         if query is None:
@@ -66,3 +67,4 @@ class BaseRepository:
     async def delete_by_id(self, id_: Any) -> Any:
         stmt = delete(self.model).where(self.model.id == id_)
         await self._session.execute(stmt)
+        await self._session.commit()  # todo: пока так. позже подумаю, как внедрить транзакцию
