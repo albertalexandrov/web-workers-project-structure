@@ -6,8 +6,9 @@ from candidates_for_external_lib.pagination import PageNumberPagination
 from shared.repositories.help import WidgetsRepository, SectionsRepository, ArticleContentRepository
 from web.api.help.filters import SectionFilters, ArticleContentFilters
 from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema, \
-    RetrieveArticleContentSchema
-from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService
+    RetrieveArticleContentSchema, CreateUpdateArticleContentSchema
+from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService, \
+    ArticleContentCreateService
 from web.exceptions import NotFoundError
 
 router = APIRouter(tags=["Справка"])
@@ -60,3 +61,10 @@ async def get_article_contents(
     repository: ArticleContentRepository = Depends(),
 ):
     return await repository.get_list_w_widgets(filtering, pagination)
+
+
+@router.post("/article_content", response_model=RetrieveArticleContentSchema, status_code=201)
+async def create_article_content(
+    data: CreateUpdateArticleContentSchema, service: ArticleContentCreateService = Depends()
+):
+    return await service.create_article_content(data)

@@ -1,5 +1,6 @@
 from sqlalchemy import select, delete, func, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.util import await_only
 
 from candidates_for_external_lib.pagination import PageNumberPagination
 from candidates_for_external_lib.repositories.queryset import QuerySet
@@ -15,7 +16,6 @@ class BaseRepository:
         instance = self.model(**values)
         self._session.add(instance)
         await self._session.commit()
-        print(instance)
         return instance
 
     @property
@@ -55,3 +55,6 @@ class BaseRepository:
             count = await self._session.scalar(count_query)
             return {"count": count, "results": entries}
         return entries
+
+    async def get_by_pk(self, pk_value: int):
+        return await self._session.get(self.model, pk_value)

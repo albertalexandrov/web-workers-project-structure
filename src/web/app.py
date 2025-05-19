@@ -40,12 +40,14 @@ def any_body_bad_request_exception_handler(request: Request, exc: AnyBodyBadRequ
 
 
 def request_validation_error_handler(request: Request, exc):
+    print(exc.errors())
     errors = locale.translate(exc.errors(), "ru_RU")
     content = benedict()
     for error in errors:
         key = []
         for item in error["loc"][1:]:
             key.append(item)
+        print(key)
         key = '.'.join(key)
         content[key] = error["msg"]
     return JSONResponse(content, status_code=422)

@@ -1,6 +1,7 @@
 from typing import Annotated
+from uuid import UUID
 
-from pydantic import BaseModel, AnyUrl, AfterValidator
+from pydantic import BaseModel, AnyUrl, AfterValidator, PositiveInt
 
 from models.help import ReferenceInfoStatus
 
@@ -40,7 +41,18 @@ class RetrieveArticleContentSchema(BaseModel):
     subsection_id: int
     subtitle: str | None
     text: str | None
-    video_url: str | None
+    video_url: str | AnyUrl | None
     order: int
     content_type: str
     widget: WidgetSchema | None
+
+
+class CreateUpdateArticleContentSchema(BaseModel):
+    subsection_id: PositiveInt
+    subtitle: str
+    text: str
+    video_url: Annotated[AnyUrl | None, AfterValidator(lambda value: str(value))]
+    order: int
+    content_type: str
+    image_id: UUID | None
+    widget_id: PositiveInt
