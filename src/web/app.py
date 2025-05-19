@@ -20,7 +20,7 @@ from shared.constants import EnvironmentEnum
 from web.api.docs.views import router as docs_router
 from web.api.monitoring.views import router as monitoring_router
 from web.api.help.views import router as help_router
-from web.exceptions import RequestBodyValidationError
+from web.exceptions import RequestBodyValidationError, NotFoundError, AnyBodyBadRequestError
 from web.i18n import locale
 from web.middlewares import example_middleware
 
@@ -29,6 +29,14 @@ APP_ROOT = Path(__file__).parent
 
 def request_body_validation_error_handler(request: Request, exc: RequestBodyValidationError):
     return JSONResponse(exc.validation_errors, status_code=422)
+
+
+def not_found_error_handler(request: Request, exc: NotFoundError):
+    return JSONResponse({"error": exc.error}, status_code=404)
+
+
+def any_body_bad_request_exception_handler(request: Request, exc: AnyBodyBadRequestError) -> JSONResponse:
+    return JSONResponse(status_code=400, content=exc.body)
 
 
 def request_validation_error_handler(request: Request, exc):
@@ -85,6 +93,8 @@ def get_app() -> FastAPI:
         exception_handlers={
             RequestValidationError: request_validation_error_handler,
             RequestBodyValidationError: request_body_validation_error_handler,
+            NotFoundError: not_found_error_handler,
+            AnyBodyBadRequestError: any_body_bad_request_exception_handler,
         },
     )
     include_routers(app)

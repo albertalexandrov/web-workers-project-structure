@@ -29,7 +29,6 @@ class RetrieveSectionSchema(BaseModel):
 
 
 class CreateUpdateSectionSchema(BaseModel):
-    code: str
     name: str
     status: ReferenceInfoStatus
     page_url: Annotated[AnyUrl, AfterValidator(lambda value: str(value))]
