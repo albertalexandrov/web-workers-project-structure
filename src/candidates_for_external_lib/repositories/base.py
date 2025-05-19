@@ -47,7 +47,10 @@ class BaseRepository:
         if pagination:
             # todo:
             #  попробовать поместить логику применения пагинации в класс пагинации,
-            #  который бы принимал sql запрос и sql возвращал запрос
+            #  который бы принимал в метод, например, paginate, sql запрос и sql возвращал запрос,
+            #  как то происходит в фильтрации:
+            #   query = filtering.filter(query)
+            #   query = filtering.sort(query)
             offset = (pagination.page - 1) * pagination.limit
             query = query.limit(pagination.limit).offset(offset)
         result = await self._session.scalars(query)
