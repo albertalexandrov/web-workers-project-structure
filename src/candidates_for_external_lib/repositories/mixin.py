@@ -1,6 +1,7 @@
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from candidates_for_external_lib.pagination import PageNumberPagination
 from candidates_for_external_lib.repositories.queryset import QuerySet
 
 
@@ -33,3 +34,24 @@ class BaseRepository:
     async def delete(self):
         stmt = delete(self.model)
         await self._session.execute(stmt)
+
+    async def get_list(self, query=None, pagination: PageNumberPagination | None = None, filtering=None):
+        if query is None:
+            query = select(self.model)
+        count_query = query.with_only_columns(func.count(literal_column("1")), maintain_column_froms=True)
+        if filtering:
+            query = filtering.filter(query)
+            query = filtering.sort(query)
+            count_query = filtering.filter(count_query)
+        if pagination:
+            # todo:
+            #  попробовать поместить логику применения пагинации в класс пагинации,
+            #  который бы принимал sql запрос и sql возвращал запрос
+            offset = (pagination.page - 1) * pagination.limit
+            query = query.limit(pagination.limit).offset(offset)
+        result = await self._session.scalars(query)
+        entries = result.unique().all()
+        if pagination:
+            count = await self._session.scalar(count_query)
+            return {"count": count, "results": entries}
+        return entries

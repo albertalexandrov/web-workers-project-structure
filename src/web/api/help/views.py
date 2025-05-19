@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
+from fastapi_filter import FilterDepends
 
+from candidates_for_external_lib.responses.paginated import PaginatedResponse
+from candidates_for_external_lib.pagination import PageNumberPagination
 from shared.repositories.help import WidgetsRepository, SectionsRepository
+from web.api.help.filters import SectionFilters
 from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema
 from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService
 from web.exceptions import NotFoundError
@@ -37,3 +41,12 @@ async def update_section(section_id: int, data: CreateUpdateSectionSchema, servi
 @router.delete("/section/{section_id}", status_code=204)
 async def delete_section(section_id: int, service: SectionDeleteService = Depends()):
     await service.delete_section(section_id)
+
+
+@router.get("/section", response_model=PaginatedResponse[RetrieveSectionSchema])
+async def get_sections(
+    filtering: SectionFilters = FilterDepends(SectionFilters),
+    pagination: PageNumberPagination = Depends(),
+    repository: SectionsRepository = Depends(),
+):
+    return await repository.get_list_w_subsections(filtering, pagination)
