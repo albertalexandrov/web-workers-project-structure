@@ -1,5 +1,7 @@
 from typing import Any
 
+# todo: тоже в принципе можно вынести в библиотеку
+
 
 class RequestBodyValidationError(Exception):
     def __init__(self, validation_errors: dict) -> None:
