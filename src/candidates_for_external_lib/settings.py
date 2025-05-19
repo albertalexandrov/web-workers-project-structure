@@ -25,15 +25,17 @@ class DatabaseSettings(BaseModel):
     database: str
     options: dict | None = None  # todo: может kwargs
 
-    @field_validator("options", mode="after")
+    @field_validator("options", mode="after")  # noqa
     @classmethod
-    def append_options(cls, options: dict[str, Any]) -> dict[str, Any]:
+    def append_options(cls, options: dict[str, Any] | None) -> dict[str, Any]:
         options = options or {}
         if "connect_args" not in options:
             options["connect_args"] = {}
         if "server_settings" not in options["connect_args"]:
             options["connect_args"]["server_settings"] = {}
-        # todo: обработать получение application_name из энвов, учитывая, что DatabaseSettings будет во внешней либе
+        # todo:
+        #  обработать получение application_name из энвов, учитывая, что DatabaseSettings будет во внешней либе
+        #  p.s. или наверно пусть будет возможность в определить в настройках DatabaseSettings
         # options["connect_args"]["server_settings"]["application_name"] = PROJECT_NAME
         options["json_serializer"] = lambda obj: orjson.dumps(obj).decode()
         options["json_deserializer"] = orjson.loads
