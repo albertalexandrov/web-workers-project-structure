@@ -26,6 +26,7 @@ from web.middlewares import example_middleware
 
 APP_ROOT = Path(__file__).parent
 
+# todo: обработчики можно вынести в библиотеку в папку faststream, например
 
 def request_body_validation_error_handler(request: Request, exc: RequestBodyValidationError):
     return JSONResponse(exc.validation_errors, status_code=422)

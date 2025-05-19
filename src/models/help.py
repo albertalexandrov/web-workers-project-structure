@@ -7,8 +7,8 @@ from sqlalchemy import UUID as saUUID  # noqa
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column, relationship
 
-from candidates_for_external_lib.sa.models.mixins import TimestampzMixin
-from candidates_for_external_lib.sa.models.base import Base
+from candidates_for_external_lib.sqlalchemy.models.mixins import TimestampzMixin
+from candidates_for_external_lib.sqlalchemy.models.base import Base
 from candidates_for_external_lib.utils.time import utcnow
 
 
