@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from shared.repositories.help import WidgetsRepository, SectionsRepository
 from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema
-from web.api.help.services import CreateSectionService, SectionUpdateService
+from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService
 from web.exceptions import NotFoundError
 
 router = APIRouter(tags=["Справка"])
@@ -32,3 +32,8 @@ async def get_section(section_id: int, repository: SectionsRepository = Depends(
 @router.put("/section/{section_id}", response_model=RetrieveSectionSchema)
 async def update_section(section_id: int, data: CreateUpdateSectionSchema, service: SectionUpdateService = Depends()):
     return await service.update_section(section_id, data.model_dump(exclude_unset=True))
+
+
+@router.delete("/section/{section_id}", status_code=204)
+async def delete_section(section_id: int, service: SectionDeleteService = Depends()):
+    await service.delete_section(section_id)

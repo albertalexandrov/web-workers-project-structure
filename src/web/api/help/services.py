@@ -4,7 +4,7 @@ from models import Section
 from models.help import ReferenceInfoStatus, Subsection
 from shared.repositories.help import SectionsRepository, SubsectionRepository
 from web.api.help.schemas import CreateUpdateSectionSchema
-from web.api.help.utils import is_published_instance, subsection_has_content
+from web.api.help.utils import is_published_instance, subsection_has_content, delete_section
 from web.exceptions import AnyBodyBadRequestError, NotFoundError
 
 
@@ -28,9 +28,7 @@ class SectionUpdateService:
         self._section_repository = section_repository
 
     async def update_section(self, section_id: int, data: dict) -> Section:
-        if not (section := await self._section_repository.get_section_for_update(section_id)):
-            # todo: заменить на метод кверисета get_one_or_raise или типа того
-            raise NotFoundError
+        section = await self._get_section(section_id)
         if section.is_released and data["status"] == ReferenceInfoStatus.unpublished:
             self._unpublish_child_subsections(section)
         if is_published_instance(data["status"], section):
@@ -40,6 +38,12 @@ class SectionUpdateService:
                 raise AnyBodyBadRequestError(err_msg)
             self._publish_child_subsections(section)
         return section.update(**data)
+
+    async def _get_section(self, section_id: int) -> Section:
+        if section := await self._section_repository.get_section_for_update(section_id):
+            # todo: заменить на метод кверисета get_one_or_raise или типа того
+            return section
+        raise NotFoundError
 
     def _publish_child_subsections(self, section: Section) -> None:
         for ss in section.subsections:
@@ -58,3 +62,18 @@ class SectionUpdateService:
             if not subsection_has_content(subsection):
                 subsections_wo_content.add(subsection)
         return subsections_wo_content
+
+
+class SectionDeleteService:
+    def __init__(self, section_repository: SectionsRepository = Depends()):
+        self._section_repository = section_repository
+
+    async def delete_section(self, section_id: int):
+        section = await self._get_section(section_id)
+        delete_section(section)
+
+    async def _get_section(self, section_id: int) -> Section:
+        if section := await self._section_repository.get_section_for_update(section_id):
+            # todo: заменить на метод кверисета get_one_or_raise или типа того
+            return section
+        raise NotFoundError
