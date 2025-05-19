@@ -15,12 +15,16 @@ async def get_widgets(repository: WidgetsRepository = Depends()):
 
 @router.post("/section", response_model=RetrieveSectionSchema, status_code=201)
 async def create_section(data: CreateUpdateSectionSchema, service: CreateSectionService = Depends()):
+    # todo:
+    #  разобраться с ситуацией, когда при использовании зависимости, сначала происходит сериализация,
+    #  и только потом коммит. возможно создавать сессию в виде декоратора для вьюхи
     return await service.create_section(data)
 
 
 @router.get("/section/{section_id}", response_model=RetrieveSectionSchema)
 async def get_section(section_id: int, repository: SectionsRepository = Depends()):
     if section := await repository.get_section_for_retrieve(section_id):
+        # todo: заменить на метод кверисета get_one_or_raise или типа того
         return section
     raise NotFoundError
 

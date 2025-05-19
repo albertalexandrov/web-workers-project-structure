@@ -29,6 +29,7 @@ class SectionUpdateService:
 
     async def update_section(self, section_id: int, data: dict) -> Section:
         if not (section := await self._section_repository.get_section_for_update(section_id)):
+            # todo: заменить на метод кверисета get_one_or_raise или типа того
             raise NotFoundError
         if section.is_released and data["status"] == ReferenceInfoStatus.unpublished:
             self._unpublish_child_subsections(section)
