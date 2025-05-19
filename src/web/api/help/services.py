@@ -82,27 +82,9 @@ class SectionDeleteService(GetOr404Mixin):
         return self.get_or_404(section)
 
 
-class ArticleContentCreateService(GetOr404Mixin):
-    def __init__(
-        self,
-        article_content_repository: ArticleContentRepository = Depends(),
-        widget_repository: WidgetsRepository = Depends(),
-        subsection_repository: SubsectionRepository = Depends(),
-    ):
-        self._article_content_repository = article_content_repository
-        self._widget_repository = widget_repository
-        self._subsection_repository = subsection_repository
+class ArticleContentCreateUpdateValidationMixin:
 
-    async def create_article_content(self, data: CreateUpdateArticleContentSchema) -> ArticleContent:
-        validated_data = await self._validate_create_update_data(data)
-        return await self._article_content_repository.create(**validated_data)
-
-    # async def _get_article_content(self, article_content_id: int) -> ArticleContent:
-    #     article_content = await self._article_content_repository.get_article_content_for_retrieve(article_content_id)
-    #     # todo: заменить на метод кверисета get_one_or_raise или типа того
-    #     return self.get_or_404(article_content)
-
-    async def _validate_create_update_data(self, data: CreateUpdateArticleContentSchema) -> dict:
+    async def _validate(self, data: CreateUpdateArticleContentSchema) -> dict:
         validation_errors = {}
         widget = await self._widget_repository.get_by_pk(data.widget_id)
         if not widget:
@@ -116,3 +98,47 @@ class ArticleContentCreateService(GetOr404Mixin):
         data.pop("widget_id")
         data["widget"] = widget
         return data
+
+
+class ArticleContentCreateService(ArticleContentCreateUpdateValidationMixin, GetOr404Mixin):
+    def __init__(
+        self,
+        article_content_repository: ArticleContentRepository = Depends(),
+        widget_repository: WidgetsRepository = Depends(),
+        subsection_repository: SubsectionRepository = Depends(),
+    ):
+        self._article_content_repository = article_content_repository
+        self._widget_repository = widget_repository
+        self._subsection_repository = subsection_repository
+
+    async def create_article_content(self, data: CreateUpdateArticleContentSchema) -> ArticleContent:
+        validated_data = await self._validate(data)
+        return await self._article_content_repository.create(**validated_data)
+
+
+
+class ArticleContentUpdateService(ArticleContentCreateUpdateValidationMixin, GetOr404Mixin):
+    # по идее схема для обновления не должна включать возможность изменения подраздела,
+    # а валидация не должна запрашивать виджет, если виджет не меняется
+    def __init__(
+        self,
+        article_content_repository: ArticleContentRepository = Depends(),
+        widget_repository: WidgetsRepository = Depends(),
+        subsection_repository: SubsectionRepository = Depends(),
+    ):
+        self._article_content_repository = article_content_repository
+        self._widget_repository = widget_repository
+        self._subsection_repository = subsection_repository
+
+    async def update_article_content(
+        self, article_content_id: int, data: CreateUpdateArticleContentSchema
+    ) -> ArticleContent:
+        article_content = await self._get_article_content(article_content_id)
+        validated_data = await self._validate(data)  # наверно вместо put иметь только patch
+        article_content.update(**validated_data)
+        return article_content
+
+    async def _get_article_content(self, article_content_id: int) -> ArticleContent:
+        article_content = await self._article_content_repository.objects.filter(id=article_content_id).options('widget').first()
+        # todo: заменить на метод кверисета get_one_or_raise или типа того
+        return self.get_or_404(article_content)

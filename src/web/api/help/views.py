@@ -8,7 +8,7 @@ from web.api.help.filters import SectionFilters, ArticleContentFilters
 from web.api.help.schemas import WidgetSchema, RetrieveSectionSchema, CreateUpdateSectionSchema, \
     RetrieveArticleContentSchema, CreateUpdateArticleContentSchema
 from web.api.help.services import CreateSectionService, SectionUpdateService, SectionDeleteService, \
-    ArticleContentCreateService
+    ArticleContentCreateService, ArticleContentUpdateService
 from web.exceptions import NotFoundError
 
 router = APIRouter(tags=["Справка"])
@@ -76,3 +76,10 @@ async def get_article_content(article_content_id: int, repository: ArticleConten
         # todo: заменить на метод кверисета get_one_or_raise или типа того
         return ac
     raise NotFoundError
+
+
+@router.put("/article_content/{article_content_id}", response_model=RetrieveArticleContentSchema)
+async def update_article_content(
+    article_content_id: int, data: CreateUpdateArticleContentSchema, service: ArticleContentUpdateService = Depends()
+):
+    return await service.update_article_content(article_content_id, data)

@@ -64,8 +64,3 @@ class ArticleContentRepository(BaseRepository):
         # todo: кандидат на замену методом кверисета
         stmt = select(self.model).options(joinedload(self.model.widget))
         return await self.get_list(stmt, pagination, filtering)
-
-    async def get_article_content_for_retrieve(self, article_content_id: int) -> ArticleContent | None:
-        # todo: кандидат на замену методом кверисета
-        stmt = select(self.model).where(self.model.id == article_content_id).options(joinedload(self.model.widget))
-        return await self._session.scalar(stmt)
