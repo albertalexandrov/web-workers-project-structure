@@ -1,6 +1,6 @@
 from typing import Any
 
-# todo: тоже в принципе можно вынести в библиотеку
+# todo: тоже в принципе можно вынести в библиотеку вместе с их обработчиками
 
 
 class RequestBodyValidationError(Exception):
