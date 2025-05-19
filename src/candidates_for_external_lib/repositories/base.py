@@ -10,6 +10,8 @@ from candidates_for_external_lib.repositories.queryset import QuerySet
 class BaseRepository:
     model = None
 
+    # todo: внедрить django-like фильтрацию?
+
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -68,3 +70,5 @@ class BaseRepository:
         stmt = delete(self.model).where(self.model.id == id_)
         await self._session.execute(stmt)
         await self._session.commit()  # todo: пока так. позже подумаю, как внедрить транзакцию
+
+    # todo: другие методы
