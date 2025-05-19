@@ -1,6 +1,7 @@
+from typing import Any
+
 from sqlalchemy import select, delete, func, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.util import await_only
 
 from candidates_for_external_lib.pagination import PageNumberPagination
 from candidates_for_external_lib.repositories.queryset import QuerySet
@@ -58,3 +59,7 @@ class BaseRepository:
 
     async def get_by_pk(self, pk_value: int):
         return await self._session.get(self.model, pk_value)
+
+    async def delete_by_id(self, id_: Any) -> Any:
+        stmt = delete(self.model).where(self.model.id == id_)
+        await self._session.execute(stmt)

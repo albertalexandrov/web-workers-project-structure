@@ -83,3 +83,8 @@ async def update_article_content(
     article_content_id: int, data: CreateUpdateArticleContentSchema, service: ArticleContentUpdateService = Depends()
 ):
     return await service.update_article_content(article_content_id, data)
+
+
+@router.delete("/article_content/{article_content_id}", status_code=204)
+async def delete_article_content(article_content_id: int, repository: ArticleContentRepository = Depends()):
+    await repository.delete_by_id(article_content_id)
