@@ -11,6 +11,7 @@ class ReprMixin:
         class_name, params = self.__class__.__name__, []
         for field in self.__repr_attrs__:
             value = getattr(self, field, "Атрибут не найден")
+            # todo: вывести предупреждение, если атрибут класса не найден
             params.append("{}={}".format(field, value))
         params = ", ".join(params)  # type: ignore[assignment]
         return f"{class_name}({params})"
