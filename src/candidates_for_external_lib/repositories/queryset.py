@@ -64,7 +64,8 @@ class QuerySet:
         #   first_name__in=["Alex", "John"]
         #   type__code="sh" - through relation
         #   etc
-        # todo: цепочечное применение фильтров. обратить внимание на join-ы
+        # todo:
+        #  цепочечное применение фильтров. обратить внимание на join-ы
         for attr, value in filters.items():
             model = self._model
             if "__" in attr:
@@ -84,6 +85,7 @@ class QuerySet:
         return self
 
     def options(self, *args):
+        # todo: note: по умолчанию joinedload делает left join
         self._options.extend(args)
         return self
 

@@ -68,3 +68,11 @@ async def create_article_content(
     data: CreateUpdateArticleContentSchema, service: ArticleContentCreateService = Depends()
 ):
     return await service.create_article_content(data)
+
+
+@router.get("/article_content/{article_content_id}", response_model=RetrieveArticleContentSchema)
+async def get_article_content(article_content_id: int, repository: ArticleContentRepository = Depends()):
+    if ac := await repository.objects.filter(id=article_content_id, widget__code='ascsa').options('widget').first():
+        # todo: заменить на метод кверисета get_one_or_raise или типа того
+        return ac
+    raise NotFoundError
